@@ -11,7 +11,7 @@ function refreshResume(){$('resumeBtn').style.display=localStorage.getItem(KEY)?
 function resumeSaved(){try{state=JSON.parse(localStorage.getItem(KEY));if(state.screen==='quotes')renderQuote();if(state.screen==='questions')renderQuestion();if(state.screen==='results')renderResults();go(state.screen||'quotes')}catch(e){alert('Saved project could not be loaded.')}}
 function buildQuotes(){
  state.project={name:$('projectName').value||'Home project',type:$('projectType').value,count:+$('quoteCount').value};
- state.quotes=Array.from({length:state.project.count},()=>({name:'',price:0,tax:0,deposit:0,extras:0,priceType:'Fixed Price',answers:Array(QUESTIONS.length).fill(null)});
+ state.quotes=Array.from({length:state.project.count},()=>({name:'',price:0,tax:0,deposit:0,extras:0,priceType:'Fixed Price',answers:Array(QUESTIONS.length).fill(null)}));
  state.quoteIndex=0;renderQuote();go('quotes');
 }
 function renderQuote(){
