@@ -1,0 +1,9 @@
+{
+  "name": "QuoteWise \u2014 Home Contractor Quote Decoder",
+  "short_name": "QuoteWise",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f8fa",
+  "theme_color": "#17324d",
+  "description": "Compare contractor quotes locally on your device."
+}
