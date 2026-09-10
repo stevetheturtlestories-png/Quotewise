@@ -5,7 +5,7 @@ const SUBTYPES={"HVAC":["Furnace replacement / upgrade","Air conditioner replace
 const FACTOR={"Yes":1,"Partly":0.5,"Not Clear":0.25,"No":0,"N/A":null};
 const STORAGE_KEY="choicegrade-v5-project";
 const ANSWERS=[["Yes","Clearly addressed"],["Partly","Some information provided"],["Not Clear","I can't tell"],["No","Not addressed"],["N/A","Doesn't apply"]];
-let state={version:5.3,project:{count:3,country:"US",category:"HVAC",subtype:"Furnace replacement / upgrade",currency:"USD"},contractors:[],contractorIndex:0,qIndex:0,phase:"core",screen:"welcome"};
+let state={version:6.2,project:{count:3,country:"US",category:"HVAC",subtype:"Furnace replacement / upgrade",currency:"USD"},contractors:[],contractorIndex:0,qIndex:0,phase:"core",screen:"welcome"};
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function money(n){return new Intl.NumberFormat(state.project.country==="CA"?"en-CA":"en-US",{style:"currency",currency:state.project.currency||"USD",maximumFractionDigits:0}).format(Number(n)||0);}
@@ -190,6 +190,7 @@ function clarificationCard(c,i,q){
 function addExtra(i){const c=state.contractors[i],label=prompt("What additional cost did you identify?");if(!label)return;const status=(prompt("Type Confirmed, Estimated, or Unknown","Confirmed")||"Confirmed").trim();let amount=0;if(status.toLowerCase()!=="unknown")amount=+(prompt("Amount","0")||0);c.knownExtras.push({label,status:status[0].toUpperCase()+status.slice(1).toLowerCase(),amount});saveNow(false);renderResults();}
 function renderResults(){
  state.contractors.forEach(ensureClarifications);
+ const cgPaid=(window.ChoiceGradeAccess?.hasPaidAccess?.()||false);
  const rows=state.contractors.map(c=>[c,metrics(c)]),ranked=[...rows].sort((a,b)=>b[1].score-a[1].score),best=ranked[0],low=[...rows].filter(x=>x[0].price>0).sort((a,b)=>a[0].price-b[0].price)[0];
  $("resultSummary").textContent=`${best[0].name} currently has the most complete written proposal based on the information you provided${low?`, while ${low[0].name} has the lowest quoted price`:""}. ChoiceGrade does not choose the contractor for you.`;
  const fs=generateFindings(rows);
@@ -221,6 +222,7 @@ function renderResults(){
  $("uncovered").innerHTML=`<div class="metric"><strong>${totalClar}</strong><span>questions still worth clarifying</span></div><div class="metric"><strong>${resolvedTotal}</strong><span>contractor questions resolved</span></div><div class="metric"><strong>${money(extraTotal)}</strong><span>known added costs entered</span></div><div class="metric"><strong>${important}</strong><span>important differences found</span></div>`;
  $("beforeSign").innerHTML=["Final price understood","Scope of work understood","Known additional costs identified","Payment schedule understood","Warranty understood","Permits / inspections clarified","Important promises are in writing","Outstanding questions resolved"].map(x=>`<label><input type="checkbox"> <span>${x}</span></label>`).join("");
  saveNow(false);
+ if(!cgPaid)window.ChoiceGradeAccess?.gateResults?.();
 }
 function exportProject(){if(!state.contractors.length){alert("Start a comparison first.");return;}const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`ChoiceGrade-${(state.project.name||"project").replace(/[^a-z0-9]+/gi,"-")}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);}
 function newProject(){if(confirm("Start a new comparison? Your current saved comparison will be replaced.")){localStorage.removeItem(STORAGE_KEY);location.reload();}}

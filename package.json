@@ -1,0 +1,9 @@
+{
+  "name": "choicegrade-v6",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
+    "stripe": "^18.5.0"
+  }
+}

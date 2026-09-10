@@ -150,3 +150,19 @@
   #results>h1{margin-top:4px}
   .resolveCard{background:#fff!important}
 }
+
+
+/* ChoiceGrade V6 Phase 2A — account + free-preview/paywall shell */
+.paywallOverlay{position:fixed;inset:0;z-index:1000;background:rgba(7,19,31,.72);backdrop-filter:blur(5px);display:grid;place-items:center;padding:16px}
+.paywallOverlay.hidden{display:none!important}
+.paywallCard{position:relative;width:min(100%,620px);max-height:92vh;overflow:auto;background:#fff;border-radius:22px;padding:26px;box-shadow:0 30px 90px #0005}
+.paywallClose{position:absolute;right:14px;top:12px;width:36px;height:36px;padding:0;border-radius:50%;background:#eef3f5;color:var(--navy);font-size:25px;line-height:1}
+.paywallCard h2{font-size:32px;line-height:1.08;margin:10px 38px 10px 0}
+.paywallCard>p{color:var(--muted);line-height:1.55}
+.paywallFeatures{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin:18px 0;color:#394956;font-size:14px}
+.paywallPlans{display:grid;gap:11px;margin-top:18px}
+.planChoice{width:100%;display:flex;justify-content:space-between;align-items:center;gap:18px;text-align:left;background:#fff;color:var(--ink);border:1px solid var(--line);padding:16px;border-radius:14px}
+.planChoice span{display:grid;gap:3px}.planChoice b{font-size:17px;color:var(--navy)}.planChoice small{font-size:12px;color:var(--muted);font-weight:500}.planChoice strong{font-size:24px;color:var(--navy);white-space:nowrap}
+.planChoice em{width:max-content;font-style:normal;font-size:9px;letter-spacing:.1em;background:var(--greenbg);color:var(--green);padding:5px 7px;border-radius:999px}
+.featuredPlan{border:2px solid var(--green);background:#fbfffd}.paywallFine{text-align:center;font-size:12px;margin-bottom:0}
+@media(max-width:620px){.paywallCard{padding:21px 16px}.paywallCard h2{font-size:27px}.paywallFeatures{grid-template-columns:1fr}.planChoice strong{font-size:21px}}
