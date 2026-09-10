@@ -1,15 +1,18 @@
-QUOTEWISE V3 — ANALYSIS BUILD
+ChoiceGrade V5.1 Visual Polish
 
-New in V3:
-- "Why this matters" explanation on every evaluation question
-- Smarter project-type applicability hints
-- Stronger analysis insights for cost spread, deposit size, and variable pricing
-- Category-by-category scoring
-- Better contractor follow-up questions
-- Local save/resume
-- Export/import JSON project backups
-- Print / Save PDF results
-- Offline/PWA structure
-- No database, AI API, or recurring software service required
+Replace ONLY styles.css in the root of your GitHub Quotewise repository.
 
-Open index.html to inspect the app. For install/offline PWA behavior, host the static files or serve them over local HTTP.
+This update keeps all V5 logic unchanged and fixes:
+- Yes / Clearly addressed spacing
+- Partly / Some information provided spacing
+- Not Clear / I can't tell spacing
+- No / Not addressed spacing
+- N/A / Doesn't apply spacing
+- Contractor result label/value alignment
+- Cleaner score box
+- Better badge spacing
+- Before You Sign checkbox alignment
+- Mobile typography and spacing
+
+After uploading/committing styles.css, wait about a minute, then refresh the live ChoiceGrade page.
+If your phone still shows the old layout, fully close and reopen the browser tab or refresh again.
