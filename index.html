@@ -1,11 +1,120 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#11263a"><title>ChoiceGrade — Home Contractor Decoder</title><link rel="manifest" href="manifest.json"><link rel="icon" type="image/png" href="icon-192.png"><link rel="stylesheet" href="styles.css?v=5.3"></head><body>
-<header><div class="headerBrand"><img src="icon-192.png" class="headerMark" alt=""><div><div class="brand">CHOICE<span>GRADE</span></div><div class="tag">Home Contractor Decoder</div></div></div><div class="headActions"><button class="headerBtn" onclick="saveNow(true)">Save</button><button class="headerBtn" onclick="exportProject()">Backup</button></div></header>
-<main>
-<section id="welcome" class="screen active"><div class="hero"><img src="choicegrade-logo.png" class="heroLogo" alt="ChoiceGrade — Compare Quotes. Ask Smarter. Choose with Confidence."><div class="eyebrow">KNOW BEFORE YOU CHOOSE</div><h1>Compare contractor quotes with confidence.</h1><p>Compare price, scope, warranties, reputation, hidden costs and unanswered questions—without pretending the app can choose the contractor for you.</p><div class="actions"><button onclick="go('setup')">Start a comparison</button><button id="resumeBtn" class="secondary hidden" onclick="resumeSaved()">Resume saved project</button></div><div class="trust">✓ Local-first privacy &nbsp; ✓ 2–5 contractors &nbsp; ✓ U.S. / Canada friendly</div></div></section>
-<section id="setup" class="screen"><div class="card"><div class="eyebrow">STEP 1</div><h2>Tell us about the project</h2><label>Project name<input id="projectName" placeholder="e.g. Furnace replacement"></label><div class="grid"><label>Country<select id="country"><option value="US">United States</option><option value="CA">Canada</option><option value="OTHER">Other</option></select></label><label>State / Province (optional)<input id="region" placeholder="e.g. Texas or Alberta"></label></div><div class="grid"><label>Project category<select id="category" onchange="renderSubtypeOptions()"></select></label><label>Project type<select id="subtype"></select></label></div><label>How many contractors are you comparing?<div id="countButtons" class="choiceRow"></div></label><button onclick="startProject()">Continue</button></div></section>
-<section id="contractor" class="screen"><div class="topline"><button class="ghost" onclick="previousContractor()">← Back</button><span id="contractorProgress"></span></div><div id="contractorForm" class="card"></div></section>
-<section id="questions" class="screen"><div class="topline"><button class="ghost" onclick="previousQuestion()">← Back</button><span id="questionProgress"></span></div><div class="progress"><div id="progressBar"></div></div><div class="card questionCard"><div id="qCategory" class="eyebrow"></div><h2 id="qText"></h2><div class="whyBox"><strong>Why this matters to you</strong><div id="qWhy"></div></div><div id="answerButtons" class="answers"></div></div></section>
-<section id="moduleIntro" class="screen"><div class="card center"><div class="check">✓</div><div class="eyebrow">CORE REVIEW COMPLETE</div><h2 id="moduleIntroTitle"></h2><p id="moduleIntroText" class="muted"></p><button onclick="beginModule()">Continue</button></div></section>
-<section id="reputation" class="screen"><div class="topline"><button class="ghost" onclick="go('questions')">← Back</button><span id="reputationProgress"></span></div><div class="card"><div class="eyebrow">REPUTATION CHECK</div><h2 id="repTitle"></h2><p class="muted">Optional. Reputation stays separate from Quote Clarity.</p><button class="secondary" onclick="searchReviews()">Search contractor reviews</button><div class="grid"><label>Google rating<input id="repRating" type="number" min="0" max="5" step=".1" placeholder="4.7"></label><label>Review count<input id="repCount" type="number" min="0" placeholder="286"></label></div><label>Are recent reviews generally positive?<select id="repRecent"><option>Not Sure</option><option>Yes</option><option>Mixed</option><option>No</option></select></label><label>Do negative reviews show the same complaint repeatedly?<select id="repRecurring"><option>Not Sure</option><option>No</option><option>A Few</option><option>Yes</option></select></label><label>Do reviews or references show experience with projects similar to yours?<select id="repSimilar"><option>Not Sure</option><option>Yes</option><option>Some</option><option>No</option></select></label><div class="actions"><button onclick="saveReputation()">Save & continue</button><button class="secondary" onclick="skipReputation()">Skip</button></div></div></section>
-<section id="results" class="screen"><div class="reportBrand"><img src="choicegrade-logo.png" alt="ChoiceGrade"></div><div class="topline"><button class="ghost" onclick="go('questions')">← Review answers</button><button class="ghost" onclick="newProject()">New comparison</button></div><div class="eyebrow">CHOICEGRADE ANALYSIS</div><h1>Your comparison is ready.</h1><p id="resultSummary" class="lead"></p><div id="findings"></div><h2>Contractor snapshot</h2><div id="contractorCards"></div><div class="card"><h2>Side-by-side comparison</h2><div id="compareTable" class="tableWrap"></div></div><div class="card"><h2>Questions before you choose</h2><div id="clarifications"></div></div><div class="card"><h2>What ChoiceGrade helped you uncover</h2><div id="uncovered" class="metrics"></div></div><div class="card"><h2>Before you sign</h2><div id="beforeSign"></div></div><div class="actions"><button onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="exportProject()">Download backup</button></div></section>
-</main><footer>ChoiceGrade is a decision-support tool. It does not guarantee contractor quality or final project cost.</footer><script src="app.js?v=5.3"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#11263a">
+  <title>ChoiceGrade — Compare Contractor Quotes with Confidence</title>
+  <meta name="description" content="Compare contractor quotes, uncover missing details, generate smarter follow-up questions, and choose with more confidence.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="stylesheet" href="marketing.css?v=6.0">
+</head>
+<body>
+  <header class="siteHeader">
+    <a href="./" class="brandLink" aria-label="ChoiceGrade home">
+      <img src="icon-192.png" alt="" class="brandIcon">
+      <div><strong>CHOICE<span>GRADE</span></strong><small>Home Contractor Decoder</small></div>
+    </a>
+    <nav class="nav">
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a class="navButton" href="app.html">Start free</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="heroCopy">
+        <div class="eyebrow">COMPARE SMARTER BEFORE YOU SIGN</div>
+        <h1>Contractor quotes are hard to compare. ChoiceGrade makes them clearer.</h1>
+        <p>Compare price, scope, warranties, hidden costs, payment terms and unanswered questions—then turn missing information into professional follow-up questions you can actually send.</p>
+        <div class="heroActions">
+          <a class="primary" href="app.html">Start a free comparison</a>
+          <a class="secondary" href="#how">See how it works</a>
+        </div>
+        <div class="trustRow"><span>✓ No contractor sponsorships</span><span>✓ U.S. & Canada friendly</span><span>✓ Built for homeowners</span></div>
+      </div>
+      <div class="heroCard">
+        <img src="choicegrade-logo.png" alt="ChoiceGrade — Compare Quotes. Ask Smarter. Choose with Confidence.">
+        <div class="previewCard">
+          <div class="previewLabel">EXAMPLE RESULT</div>
+          <div class="previewTop"><strong>Contractor A</strong><span>91/100</span></div>
+          <div class="previewBar"><i style="width:91%"></i></div>
+          <p>Most complete written proposal</p>
+          <ul><li>2 clarification questions remaining</li><li>Warranty clearly documented</li><li>Lowest price is not necessarily lowest known cost</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="problem">
+      <div><span class="kicker">THE PROBLEM</span><h2>A quote can look cheaper simply because it tells you less.</h2></div>
+      <p>ChoiceGrade does not pick a contractor for you. It helps you compare what is actually written, identify what is missing, and ask better questions before you commit.</p>
+    </section>
+
+    <section id="how" class="section">
+      <div class="sectionHead"><span class="kicker">HOW IT WORKS</span><h2>From messy quotes to a clear comparison.</h2></div>
+      <div class="steps">
+        <article><b>1</b><h3>Add your contractors</h3><p>Enter the basics from each quote, including price, equipment, schedule and payment details.</p></article>
+        <article><b>2</b><h3>Answer plain-English questions</h3><p>ChoiceGrade guides you through the details that matter without requiring contracting knowledge.</p></article>
+        <article><b>3</b><h3>See what is missing</h3><p>Compare Quote Clarity scores, known costs, warranties, reputation notes and unresolved items side by side.</p></article>
+        <article><b>4</b><h3>Ask smarter follow-up questions</h3><p>Generate a professional clarification email, record responses and watch the comparison update.</p></article>
+      </div>
+    </section>
+
+    <section class="section support">
+      <div class="sectionHead"><span class="kicker">PROJECT TYPES</span><h2>One tool for the home projects where quotes get complicated.</h2></div>
+      <div class="chips">
+        <span>Furnaces & AC</span><span>Heat pumps</span><span>EV chargers</span><span>Electrical panels</span><span>Plumbing</span><span>Roofing</span><span>Renovations</span><span>Windows & doors</span><span>Landscaping</span><span>Hot tubs & spas</span>
+      </div>
+    </section>
+
+    <section id="pricing" class="section pricing">
+      <div class="sectionHead"><span class="kicker">SIMPLE PRICING</span><h2>Use ChoiceGrade for one project—or keep it for the next one.</h2><p>Both paid options unlock the complete product. The only difference is how long you keep access.</p></div>
+      <div class="priceGrid">
+        <article class="priceCard">
+          <div class="plan">30-Day Project Pass</div><div class="price">$14.99</div><p>Full access for your current project.</p>
+          <ul><li>Compare 2–5 contractors</li><li>Full Quote Clarity analysis</li><li>Clarification Center</li><li>Printable comparison report</li></ul>
+          <a class="secondary full" href="app.html">Start free first</a>
+        </article>
+        <article class="priceCard featured">
+          <div class="best">BEST VALUE</div><div class="plan">Lifetime Homeowner Access</div><div class="price">$29.99</div><p>Use ChoiceGrade again for future home projects.</p>
+          <ul><li>Everything in the Project Pass</li><li>Permanent homeowner access</li><li>Future project categories</li><li>Future product improvements</li></ul>
+          <a class="primary full" href="app.html">Start free first</a>
+        </article>
+      </div>
+      <p class="finePrint">Checkout and account access will be connected in the next V6 phase. This build is the public website foundation.</p>
+    </section>
+
+    <section class="section security">
+      <div><span class="kicker">BUILT FOR TRUST</span><h2>Your contractor comparison should not become someone else's sales lead.</h2></div>
+      <div class="securityGrid">
+        <article><h3>Neutral by design</h3><p>ChoiceGrade is decision support—not a contractor referral marketplace.</p></article>
+        <article><h3>Clear limitations</h3><p>The app helps assess quote clarity and does not guarantee contractor quality or final cost.</p></article>
+        <article><h3>Private account model</h3><p>Paid access will be tied to each customer's own account rather than a shareable app password.</p></article>
+      </div>
+    </section>
+
+    <section id="faq" class="section faq">
+      <div class="sectionHead"><span class="kicker">FAQ</span><h2>Questions homeowners are likely to ask.</h2></div>
+      <details><summary>Does ChoiceGrade tell me which contractor to hire?</summary><p>No. It helps you compare the information you have, highlights differences and missing details, and helps you ask better questions.</p></details>
+      <details><summary>Can I compare more than three quotes?</summary><p>Yes. ChoiceGrade supports two to five contractors in one comparison.</p></details>
+      <details><summary>Is this only for HVAC?</summary><p>No. ChoiceGrade supports HVAC, electrical, plumbing, roofing, renovations, windows and doors, landscaping, pools/spas/hot tubs and general repairs.</p></details>
+      <details><summary>Will it work on my phone?</summary><p>Yes. ChoiceGrade is designed as an installable web app so it can live on your home screen and open like an app.</p></details>
+    </section>
+
+    <section class="finalCta">
+      <img src="icon-192.png" alt="">
+      <div><span class="kicker">KNOW BEFORE YOU CHOOSE</span><h2>Start comparing your contractor quotes.</h2><p>You can experience ChoiceGrade before deciding whether to unlock the full product.</p></div>
+      <a class="primary" href="app.html">Start free</a>
+    </section>
+  </main>
+
+  <footer>
+    <div><strong>ChoiceGrade</strong><span>Compare Quotes. Ask Smarter. Choose with Confidence.</span></div>
+    <div class="footerLinks"><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><span>Privacy & Terms coming in V6 security phase</span></div>
+    <p>ChoiceGrade is a decision-support tool. It does not guarantee contractor quality, workmanship, licensing status or final project cost.</p>
+  </footer>
+</body>
+</html>
