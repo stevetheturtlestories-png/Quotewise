@@ -103,3 +103,28 @@
   .detailBox{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
   .detailBox b,.detailBox span{font-size:14px}
 }
+
+
+/* ChoiceGrade V5.2 Clarification Center */
+.clarificationProgress{margin:12px 0 5px;padding:12px 14px;background:#f7fafc;border:1px solid var(--line);border-radius:12px;font-size:13px}
+.miniProgress{height:6px;background:#dfe7ed;border-radius:99px;overflow:hidden;margin:8px 0 5px}
+.miniProgress span{display:block;height:100%;background:var(--green);border-radius:99px}
+.scoreHistory{color:var(--muted);font-size:12px}
+.clarifyHeader{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+.resolveList{display:grid;gap:12px;margin-top:15px}
+.resolveCard{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff}
+.resolveCard.resolved{background:#f7fcf9;border-color:#c9e3d3}
+.resolveTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.resolveTop>div{min-width:0}.resolveTop strong{display:block;line-height:1.35}
+.resolveCard label{font-size:12px;margin-top:12px}
+.resolveCard select,.resolveCard textarea{margin-top:5px}
+.resolveCard textarea{resize:vertical;min-height:64px}
+@media(max-width:620px){
+ .resolveTop{display:grid;grid-template-columns:1fr auto}
+ .resolveCard{padding:13px}
+ .clarificationProgress{padding:11px 12px}
+}
+@media print{
+ .resolveCard select,.resolveCard textarea,.resolveCard .actions{display:none!important}
+ .resolveCard{break-inside:avoid}
+}
