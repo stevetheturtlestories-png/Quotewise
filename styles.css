@@ -128,3 +128,25 @@
  .resolveCard select,.resolveCard textarea,.resolveCard .actions{display:none!important}
  .resolveCard{break-inside:avoid}
 }
+
+
+/* ChoiceGrade V5.3 branding + communication/report polish */
+.headerBrand{display:flex;align-items:center;gap:10px;min-width:0}
+.headerMark{width:34px;height:34px;border-radius:8px;object-fit:cover;background:#fff;flex:0 0 auto}
+.headerBrand .brand{line-height:1}
+.headerBrand .tag{margin-top:3px}
+.heroLogo{display:block;width:min(100%,640px);height:auto;margin:0 auto 24px;border-radius:16px}
+.reportBrand{display:none;text-align:center;margin:0 0 18px}
+.reportBrand img{width:min(100%,430px);height:auto}
+.emailBox{font-family:inherit;line-height:1.6}
+@media(max-width:620px){
+  .headerMark{width:31px;height:31px}
+  .headerBrand .tag{font-size:9px;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .heroLogo{margin-bottom:18px;border-radius:12px}
+}
+@media print{
+  .reportBrand{display:block!important}
+  .reportBrand img{width:380px;max-width:78%}
+  #results>h1{margin-top:4px}
+  .resolveCard{background:#fff!important}
+}

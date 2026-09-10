@@ -5,7 +5,7 @@ const SUBTYPES={"HVAC":["Furnace replacement / upgrade","Air conditioner replace
 const FACTOR={"Yes":1,"Partly":0.5,"Not Clear":0.25,"No":0,"N/A":null};
 const STORAGE_KEY="choicegrade-v5-project";
 const ANSWERS=[["Yes","Clearly addressed"],["Partly","Some information provided"],["Not Clear","I can't tell"],["No","Not addressed"],["N/A","Doesn't apply"]];
-let state={version:5.2,project:{count:3,country:"US",category:"HVAC",subtype:"Furnace replacement / upgrade",currency:"USD"},contractors:[],contractorIndex:0,qIndex:0,phase:"core",screen:"welcome"};
+let state={version:5.3,project:{count:3,country:"US",category:"HVAC",subtype:"Furnace replacement / upgrade",currency:"USD"},contractors:[],contractorIndex:0,qIndex:0,phase:"core",screen:"welcome"};
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function money(n){return new Intl.NumberFormat(state.project.country==="CA"?"en-CA":"en-US",{style:"currency",currency:state.project.currency||"USD",maximumFractionDigits:0}).format(Number(n)||0);}
@@ -81,27 +81,82 @@ function criticalFlags(c,m){
 function generateFindings(rows){let f=[];rows.forEach(([c,m])=>f.push(...criticalFlags(c,m)));const byAdj=[...rows].filter(x=>x[1].adjusted>0).sort((a,b)=>a[1].adjusted-b[1].adjusted),byQuote=[...rows].filter(x=>x[0].price>0).sort((a,b)=>a[0].price-b[0].price);if(byQuote.length>1&&byAdj.length>1&&byQuote[0][0].name!==byAdj[0][0].name)f.push({type:"cost",priority:92,title:"Lowest quote may not be lowest known cost",text:`${byQuote[0][0].name} has the lowest initial quote, but ${byAdj[0][0].name} currently has the lowest Adjusted Comparison Cost based on the costs you've entered.`});rows.forEach(([c,m])=>{if(m.unknownExtras)f.push({type:"cost",priority:75,title:`${c.name} still has unknown costs`,text:`${m.unknownExtras} additional cost item${m.unknownExtras===1?" is":"s are"} still unknown.`});if(["Estimate","Time & Materials","Not Sure"].includes(c.priceType))f.push({type:"cost",priority:72,title:`${c.name}'s price may change`,text:`The proposal is listed as ${c.priceType}. Clarify what could change the final cost and how increases are approved.`});if(m.score>=90)f.push({type:"good",priority:38,title:`Very complete written proposal from ${c.name}`,text:`${c.name} currently has a Quote Clarity score of ${m.score}/100.`});});if(rows.length>1){const deps=rows.map(([c,m])=>[c,m.depPct]).filter(x=>x[1]>0).sort((a,b)=>a[1]-b[1]);if(deps.length>1&&deps.at(-1)[1]-deps[0][1]>=20)f.push({type:"cost",priority:74,title:"Upfront payments differ significantly",text:`${deps.at(-1)[0].name} requests about ${deps.at(-1)[1]}% upfront, substantially higher than at least one other quote.`});const scores=[...rows].sort((a,b)=>b[1].score-a[1].score);if(scores[0][1].score-scores.at(-1)[1].score>=12)f.push({type:"info",priority:68,title:"Quote clarity differs meaningfully",text:`${scores[0][0].name} currently has the clearest documented proposal (${scores[0][1].score}/100), while ${scores.at(-1)[0].name} has more information left to clarify (${scores.at(-1)[1].score}/100).`});}if(state.project.category==="HVAC"){const sig=new Set(rows.map(([c])=>`${c.equipment.brand}|${c.equipment.model}`).filter(x=>x!=="|"));if(sig.size>1)f.push({type:"info",priority:71,title:"Different HVAC equipment is being proposed",text:"The contractors are not all quoting the same brand/model, so price alone may not be an apples-to-apples comparison."});}const d=new Map();for(const x of f){if(!d.has(x.title)||d.get(x.title).priority<x.priority)d.set(x.title,x);}return[...d.values()].sort((a,b)=>b.priority-a.priority).slice(0,6);}
 function clarificationCandidates(c){return allQuestions().filter(q=>isOriginalClarificationItem(c,q)).sort((a,b)=>b.weight-a.weight);}
 function clarificationItems(c){return clarificationCandidates(c).filter(q=>isUnresolvedClarification(c,q));}
+const CLARIFICATION_PROMPTS={
+ price_total:"Can you confirm the total quoted price for the project?",
+ price_extras:"Can you identify any items, conditions, or circumstances that could result in additional charges beyond the quoted price?",
+ taxes:"Can you confirm whether applicable taxes are included in the quoted price?",
+ scope:"Can you confirm the complete scope of work included in your quote?",
+ equipment:"Can you confirm the main equipment and materials included in your quote, including brand and model where applicable?",
+ exclusions:"Can you identify anything specifically excluded from your quote or not included in the quoted price?",
+ cleanup:"Can you confirm whether removal of old materials or equipment, cleanup, and disposal are included?",
+ subs:"Will any part of the work be completed by subcontractors or another company? If so, which portions?",
+ license_insurance:"Can you confirm that you hold the licences and insurance required for this work in our area?",
+ start:"Can you provide an approximate start date or expected availability for the project?",
+ duration:"Can you provide an estimate of how long the work should take once it begins?",
+ upfront:"Can you confirm the amount required upfront before work begins?",
+ payments:"Can you confirm the payment schedule, including when each payment will be due?",
+ final_payment:"Can you confirm that final payment is due only after the agreed work has been completed?",
+ extra_approval:"Can you confirm that you will obtain my approval before performing additional work that would increase the project cost?",
+ change_pricing:"Can you explain how requested changes or additional work will be priced and approved?",
+ warranty:"Can you confirm the warranties included with the project, what each covers, and how long each warranty lasts?",
+ testing:"Can you confirm that the completed work will be tested and verified as operating properly before the project is considered finished?",
+ permits:"Can you confirm whether permits or inspections are required and who is responsible for arranging and paying for them?",
+ promises:"Can you confirm that any important promises or agreements we have discussed will be included in the written agreement?",
+ hvac_model:"Can you confirm the exact brand and model of the major HVAC equipment being installed?",
+ hvac_sizing:"Can you explain how you determined that the proposed HVAC equipment is appropriately sized for the home?",
+ hvac_eff:"Can you confirm the applicable efficiency rating of the proposed HVAC equipment?",
+ hvac_warranties:"Can you confirm the equipment/material warranty and the labour/workmanship warranty separately, including the length of each?",
+ hvac_service:"If warranty service is needed, who should I contact and who will perform the service?",
+ elec_products:"Can you confirm the main electrical equipment or products being installed?",
+ elec_upgrades:"Can you confirm whether any upgrades or changes to the existing electrical system will be required to support this work?",
+ elec_repairs:"If finished surfaces need to be opened, can you confirm who is responsible for repairs afterward?",
+ plumb_products:"Can you confirm the main plumbing fixtures, equipment, and materials being installed?",
+ plumb_changes:"Can you confirm whether any existing plumbing must be repaired, replaced, or modified to complete the work?",
+ plumb_repairs:"If finished surfaces need to be opened, can you confirm who is responsible for repairs afterward?",
+ roof_product:"Can you confirm the roofing materials being installed, including brand and product where applicable?",
+ roof_hidden:"If hidden roof damage is discovered after tear-off, can you explain how repairs will be approved and priced?",
+ roof_system:"Can you confirm which parts of the complete roofing system are included in the quote?",
+ roof_protect:"Can you explain how the home and property will be protected while the roofing work is being completed?",
+ reno_finishes:"Can you confirm which finishes, fixtures, and materials are included in the quoted price?",
+ reno_allowances:"Can you identify any allowances or placeholder amounts and the dollar limit for each?",
+ reno_hidden:"If hidden conditions are discovered after demolition begins, can you explain how additional work will be approved and priced?",
+ reno_protect:"Can you explain what areas of the home may be affected and how they will be protected during the renovation?",
+ win_product:"Can you confirm the manufacturer, product line, and important features of the windows or doors being installed?",
+ win_install:"Can you confirm what installation work around the new windows or doors is included?",
+ win_finish:"Can you confirm who is responsible for repairing or finishing surfaces affected by the installation?",
+ land_materials:"Can you confirm the main materials, products, and finishes being used?",
+ land_prep:"Can you confirm what site preparation is included before the new work begins?",
+ land_drain:"Can you explain how drainage or water movement will be handled if the project affects it?",
+ land_restore:"Can you confirm what restoration of the surrounding property is included after the work is complete?",
+ spa_product:"Can you confirm the exact pool, spa, hot tub, or major equipment being supplied?",
+ spa_ready:"Can you confirm everything included to make the installation fully ready to use?",
+ spa_trades:"Can you confirm whether any additional contractors or trades will be required, and which ones?",
+ spa_service:"Can you confirm the equipment warranty and ongoing service support provided?",
+ general_products:"Can you confirm the main materials, equipment, or replacement parts that will be used?",
+ general_unknown:"Can you explain whether completing the repair could uncover or require additional work?"
+};
 function requestText(q,c){
- let t=named(q.text,c).replace(/\?$/,"");
- const a=originalAnswer(c,q.id);
- return(a==="Not Clear"?"Please clarify whether ":"Please confirm whether ")+t.charAt(0).toLowerCase()+t.slice(1);
+ const polished=CLARIFICATION_PROMPTS[q.id];
+ if(polished)return polished;
+ return `Can you please clarify the following item from your quote: ${named(q.text,c)}`;
 }
 function clarificationEmail(c){
  const items=clarificationItems(c);if(!items.length)return"";
  const bullets=items.map(q=>`• ${requestText(q,c)}`).join("\n");
- return`Subject: A few questions about your ${state.project.subtype} quote
+ const project=(state.project.subtype||"project").toLowerCase();
+ return`Subject: Questions about your ${state.project.subtype} quote
 
-Hi ${c.name},
+Hello,
 
-Thank you for providing the quote for our ${state.project.subtype.toLowerCase()}. I'm reviewing the details and would appreciate clarification on a few items before making a decision.
+Thank you for providing your quote for our ${project}. I'm comparing the written details of the proposals I've received and would appreciate clarification on a few items before making a decision.
 
-Could you please confirm:
+Could you please confirm the following:
 
 ${bullets}
 
-If possible, I'd appreciate having the answers in writing so I can keep them with the quote.
+A reply by email is perfect. Having these details in writing will help me make sure I'm comparing the proposals accurately.
 
-Thank you.`;
+Thank you for your time.`;
 }
 function toggleEmail(i){const e=$(`email-${i}`);e.style.display=e.style.display==="block"?"none":"block";}
 async function copyEmail(i){try{await navigator.clipboard.writeText(clarificationEmail(state.contractors[i]));alert("Email copied.");}catch(e){alert("Copy failed. Open the email text and copy it manually.");}}
