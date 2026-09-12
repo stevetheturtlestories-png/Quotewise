@@ -1,3 +1,98 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#11263a"><title>Sign in — ChoiceGrade</title><link rel="icon" href="icon-192.png"><link rel="stylesheet" href="marketing.css?v=6.2a"><link rel="stylesheet" href="auth.css?v=6.2a"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=6.2b"></script></head><body class="authBody">
-<div class="authShell"><a href="./"><img src="choicegrade-logo.png" class="authLogo" alt="ChoiceGrade"></a><div class="authCard"><div class="kicker">YOUR CHOICEGRADE ACCOUNT</div><h1 id="authTitle">Sign in or create your account</h1><p>Your comparison stays on this device while you create your account. After checkout, you'll return to it.</p><label>Email<input id="email" type="email" autocomplete="email" placeholder="you@example.com"></label><label>Password<input id="password" type="password" autocomplete="current-password" placeholder="At least 8 characters"></label><div class="authActions"><button class="primary" onclick="signIn()">Sign in</button><button class="secondary" onclick="signUp()">Create account</button></div><button class="magicBtn" onclick="sendMagicLink()">Email me a sign-in link instead</button><div id="authMessage" class="authMessage"></div><p class="small">By creating an account, you agree to the ChoiceGrade Terms and acknowledge the Privacy Policy. Draft legal pages are part of the launch-security phase.</p></div></div>
-<script src="config.js?v=6.2c"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#11263a">
+
+  <title>Sign in — ChoiceGrade</title>
+
+  <link rel="icon" href="icon-192.png">
+  <link rel="stylesheet" href="marketing.css?v=6.2a">
+  <link rel="stylesheet" href="auth.css?v=6.2a">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=6.2c"></script>
+</head>
+
+<body class="authBody">
+
+  <div class="authShell">
+    <a href="./">
+      <img
+        src="choicegrade-logo.png"
+        class="authLogo"
+        alt="ChoiceGrade"
+      >
+    </a>
+
+    <div class="authCard">
+      <div class="kicker">YOUR CHOICEGRADE ACCOUNT</div>
+
+      <h1 id="authTitle">Sign in or create your account</h1>
+
+      <p>
+        Your comparison stays on this device while you create your account.
+        After checkout, you'll return to it.
+      </p>
+
+      <label>
+        Email
+        <input
+          id="email"
+          type="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+        >
+      </label>
+
+      <label>
+        Password
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="At least 8 characters"
+        >
+      </label>
+
+      <div class="authActions">
+        <button
+          class="primary"
+          type="button"
+          onclick="signIn()"
+        >
+          Sign in
+        </button>
+
+        <button
+          class="secondary"
+          type="button"
+          onclick="signUp()"
+        >
+          Create account
+        </button>
+      </div>
+
+      <button
+        class="magicBtn"
+        type="button"
+        onclick="sendMagicLink()"
+      >
+        Email me a sign-in link instead
+      </button>
+
+      <div id="authMessage" class="authMessage"></div>
+
+      <p class="small">
+        By creating an account, you agree to the ChoiceGrade Terms and
+        acknowledge the Privacy Policy. Draft legal pages are part of the
+        launch-security phase.
+      </p>
+    </div>
+  </div>
+
+  <script src="auth.js?v=6.2c"></script>
+
+</body>
+</html>
