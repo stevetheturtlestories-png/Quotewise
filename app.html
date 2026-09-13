@@ -1,44 +1,659 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#11263a"><title>ChoiceGrade — Home Contractor Decoder</title><link rel="manifest" href="manifest.json"><link rel="icon" type="image/png" href="icon-192.png"><link rel="stylesheet" href="styles.css?v=6.2a"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="access.js?v=6.2a"></script>
-</head><body>
-<header><div class="headerBrand"><img src="icon-192.png" class="headerMark" alt=""><div><div class="brand">CHOICE<span>GRADE</span></div><div class="tag">Home Contractor Decoder</div></div></div><div class="headActions">
-<button class="headerBtn" id="accountBtn" onclick="ChoiceGradeAccess.openAccount()">Sign in</button>
-<button class="headerBtn" onclick="saveNow(true)">Save</button>
-<button class="headerBtn" onclick="exportProject()">Backup</button>
-</div></header>
-<main>
-<section id="welcome" class="screen active"><div class="hero"><img src="choicegrade-logo.png" class="heroLogo" alt="ChoiceGrade — Compare Quotes. Ask Smarter. Choose with Confidence."><div class="eyebrow">KNOW BEFORE YOU CHOOSE</div><h1>Compare contractor quotes with confidence.</h1><p>Compare price, scope, warranties, reputation, hidden costs and unanswered questions—without pretending the app can choose the contractor for you.</p><div class="actions"><button onclick="go('setup')">Start a comparison</button><button id="resumeBtn" class="secondary hidden" onclick="resumeSaved()">Resume saved project</button></div><div class="trust">✓ Local-first privacy &nbsp; ✓ 2–5 contractors &nbsp; ✓ U.S. / Canada friendly</div></div></section>
-<section id="setup" class="screen"><div class="card"><div class="eyebrow">STEP 1</div><h2>Tell us about the project</h2><label>Project name<input id="projectName" placeholder="e.g. Furnace replacement"></label><div class="grid"><label>Country<select id="country"><option value="US">United States</option><option value="CA">Canada</option><option value="OTHER">Other</option></select></label><label>State / Province (optional)<input id="region" placeholder="e.g. Texas or Alberta"></label></div><div class="grid"><label>Project category<select id="category" onchange="renderSubtypeOptions()"></select></label><label>Project type<select id="subtype"></select></label></div><label>How many contractors are you comparing?<div id="countButtons" class="choiceRow"></div></label><button onclick="startProject()">Continue</button></div></section>
-<section id="contractor" class="screen"><div class="topline"><button class="ghost" onclick="previousContractor()">← Back</button><span id="contractorProgress"></span></div><div id="contractorForm" class="card"></div></section>
-<section id="questions" class="screen"><div class="topline"><button class="ghost" onclick="previousQuestion()">← Back</button><span id="questionProgress"></span></div><div class="progress"><div id="progressBar"></div></div><div class="card questionCard"><div id="qCategory" class="eyebrow"></div><h2 id="qText"></h2><div class="whyBox"><strong>Why this matters to you</strong><div id="qWhy"></div></div><div id="answerButtons" class="answers"></div></div></section>
-<section id="moduleIntro" class="screen"><div class="card center"><div class="check">✓</div><div class="eyebrow">CORE REVIEW COMPLETE</div><h2 id="moduleIntroTitle"></h2><p id="moduleIntroText" class="muted"></p><button onclick="beginModule()">Continue</button></div></section>
-<section id="reputation" class="screen"><div class="topline"><button class="ghost" onclick="go('questions')">← Back</button><span id="reputationProgress"></span></div><div class="card"><div class="eyebrow">REPUTATION CHECK</div><h2 id="repTitle"></h2><p class="muted">Optional. Reputation stays separate from Quote Clarity.</p><button class="secondary" onclick="searchReviews()">Search contractor reviews</button><div class="grid"><label>Google rating<input id="repRating" type="number" min="0" max="5" step=".1" placeholder="4.7"></label><label>Review count<input id="repCount" type="number" min="0" placeholder="286"></label></div><label>Are recent reviews generally positive?<select id="repRecent"><option>Not Sure</option><option>Yes</option><option>Mixed</option><option>No</option></select></label><label>Do negative reviews show the same complaint repeatedly?<select id="repRecurring"><option>Not Sure</option><option>No</option><option>A Few</option><option>Yes</option></select></label><label>Do reviews or references show experience with projects similar to yours?<select id="repSimilar"><option>Not Sure</option><option>Yes</option><option>Some</option><option>No</option></select></label><div class="actions"><button onclick="saveReputation()">Save & continue</button><button class="secondary" onclick="skipReputation()">Skip</button></div></div></section>
-<section id="results" class="screen"><div class="reportBrand"><img src="choicegrade-logo.png" alt="ChoiceGrade"></div><div class="topline"><button class="ghost" onclick="go('questions')">← Review answers</button><button class="ghost" onclick="newProject()">New comparison</button></div><div class="eyebrow">CHOICEGRADE ANALYSIS</div><h1>Your comparison is ready.</h1><p id="resultSummary" class="lead"></p><div id="findings"></div><h2>Contractor snapshot</h2><div id="contractorCards"></div><div class="card"><h2>Side-by-side comparison</h2><div id="compareTable" class="tableWrap"></div></div><div class="card"><h2>Questions before you choose</h2><div id="clarifications"></div></div><div class="card"><h2>What ChoiceGrade helped you uncover</h2><div id="uncovered" class="metrics"></div></div><div class="card"><h2>Before you sign</h2><div id="beforeSign"></div></div><div class="actions"><button onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="exportProject()">Download backup</button></div></section>
-</main><footer>ChoiceGrade is a decision-support tool. It does not guarantee contractor quality or final project cost.</footer><script src="app.js?v=6.2a"></script>
-<div id="paywallOverlay" class="paywallOverlay hidden" role="dialog" aria-modal="true" aria-labelledby="paywallTitle">
-  <div class="paywallCard">
-    <button class="paywallClose" onclick="ChoiceGradeAccess.closePaywall()" aria-label="Close">×</button>
-    <div class="eyebrow">YOUR COMPARISON IS READY</div>
-    <h2 id="paywallTitle">Unlock your complete ChoiceGrade analysis.</h2>
-    <p id="paywallSummary">Your information is saved on this device. Unlock to see the full contractor comparison, all clarification questions, response tracking and printable report.</p>
-    <div class="paywallFeatures">
-      <span>✓ Full Quote Clarity scores</span>
-      <span>✓ Missing-detail & hidden-cost flags</span>
-      <span>✓ Contractor clarification emails</span>
-      <span>✓ Before-and-after clarification tracking</span>
-      <span>✓ Printable final report</span>
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#11263a">
+
+  <title>ChoiceGrade — Home Contractor Decoder</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css?v=6.2b">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="access.js?v=6.2a"></script>
+</head>
+
+<body>
+
+<header class="appHeader">
+
+  <div class="headerBrand">
+
+    <img
+      src="choicegrade-mark.png"
+      class="headerMark"
+      alt="ChoiceGrade"
+    >
+
+    <div class="brandText">
+      <div class="brand">
+        CHOICE<span>GRADE</span>
+      </div>
+
+      <div class="tag">
+        Home Contractor Decoder
+      </div>
     </div>
-    <div class="paywallPlans">
-      <button class="planChoice" onclick="ChoiceGradeAccess.beginCheckout('project_30')">
-        <span><b>30-Day Project Pass</b><small>Full access for your current project</small></span><strong>$14.99</strong>
-      </button>
-      <button class="planChoice featuredPlan" onclick="ChoiceGradeAccess.beginCheckout('lifetime')">
-        <span><em>BEST VALUE</em><b>Lifetime Homeowner Access</b><small>Use ChoiceGrade for future projects too</small></span><strong>$39.99</strong>
-      </button>
-    </div>
-    <p class="paywallFine">Start free. No credit card required until you choose to unlock.</p>
+
   </div>
+
+  <div class="headActions">
+
+    <button
+      class="headerBtn"
+      id="accountBtn"
+      onclick="ChoiceGradeAccess.openAccount()"
+    >
+      Sign in
+    </button>
+
+    <button
+      class="headerBtn"
+      onclick="saveNow(true)"
+    >
+      Save
+    </button>
+
+    <button
+      class="headerBtn"
+      onclick="exportProject()"
+    >
+      Backup
+    </button>
+
+  </div>
+
+</header>
+
+<main>
+
+  <section id="welcome" class="screen active">
+    <div class="hero">
+
+      <img
+        src="choicegrade-logo.png"
+        class="heroLogo"
+        alt="ChoiceGrade — Compare Quotes. Ask Smarter. Choose with Confidence."
+      >
+
+      <div class="eyebrow">
+        KNOW BEFORE YOU CHOOSE
+      </div>
+
+      <h1>
+        Compare contractor quotes with confidence.
+      </h1>
+
+      <p>
+        Compare price, scope, warranties, reputation,
+        hidden costs and unanswered questions—without
+        pretending the app can choose the contractor for you.
+      </p>
+
+      <div class="actions">
+
+        <button onclick="go('setup')">
+          Start a comparison
+        </button>
+
+        <button
+          id="resumeBtn"
+          class="secondary hidden"
+          onclick="resumeSaved()"
+        >
+          Resume saved project
+        </button>
+
+      </div>
+
+      <div class="trust">
+        ✓ Local-first privacy &nbsp;
+        ✓ 2–5 contractors &nbsp;
+        ✓ U.S. / Canada friendly
+      </div>
+
+    </div>
+  </section>
+
+
+  <section id="setup" class="screen">
+
+    <div class="card">
+
+      <div class="eyebrow">
+        STEP 1
+      </div>
+
+      <h2>
+        Tell us about the project
+      </h2>
+
+      <label>
+        Project name
+        <input
+          id="projectName"
+          placeholder="e.g. Furnace replacement"
+        >
+      </label>
+
+      <div class="grid">
+
+        <label>
+          Country
+          <select id="country">
+            <option value="US">United States</option>
+            <option value="CA">Canada</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </label>
+
+        <label>
+          State / Province (optional)
+          <input
+            id="region"
+            placeholder="e.g. Texas or Alberta"
+          >
+        </label>
+
+      </div>
+
+      <div class="grid">
+
+        <label>
+          Project category
+          <select
+            id="category"
+            onchange="renderSubtypeOptions()"
+          ></select>
+        </label>
+
+        <label>
+          Project type
+          <select id="subtype"></select>
+        </label>
+
+      </div>
+
+      <label>
+        How many contractors are you comparing?
+        <div
+          id="countButtons"
+          class="choiceRow"
+        ></div>
+      </label>
+
+      <button onclick="startProject()">
+        Continue
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <section id="contractor" class="screen">
+
+    <div class="topline">
+
+      <button
+        class="ghost"
+        onclick="previousContractor()"
+      >
+        ← Back
+      </button>
+
+      <span id="contractorProgress"></span>
+
+    </div>
+
+    <div
+      id="contractorForm"
+      class="card"
+    ></div>
+
+  </section>
+
+
+  <section id="questions" class="screen">
+
+    <div class="topline">
+
+      <button
+        class="ghost"
+        onclick="previousQuestion()"
+      >
+        ← Back
+      </button>
+
+      <span id="questionProgress"></span>
+
+    </div>
+
+    <div class="progress">
+      <div id="progressBar"></div>
+    </div>
+
+    <div class="card questionCard">
+
+      <div
+        id="qCategory"
+        class="eyebrow"
+      ></div>
+
+      <h2 id="qText"></h2>
+
+      <div class="whyBox">
+
+        <strong>
+          Why this matters to you
+        </strong>
+
+        <div id="qWhy"></div>
+
+      </div>
+
+      <div
+        id="answerButtons"
+        class="answers"
+      ></div>
+
+    </div>
+
+  </section>
+
+
+  <section id="moduleIntro" class="screen">
+
+    <div class="card center">
+
+      <div class="check">
+        ✓
+      </div>
+
+      <div class="eyebrow">
+        CORE REVIEW COMPLETE
+      </div>
+
+      <h2 id="moduleIntroTitle"></h2>
+
+      <p
+        id="moduleIntroText"
+        class="muted"
+      ></p>
+
+      <button onclick="beginModule()">
+        Continue
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <section id="reputation" class="screen">
+
+    <div class="topline">
+
+      <button
+        class="ghost"
+        onclick="go('questions')"
+      >
+        ← Back
+      </button>
+
+      <span id="reputationProgress"></span>
+
+    </div>
+
+    <div class="card">
+
+      <div class="eyebrow">
+        REPUTATION CHECK
+      </div>
+
+      <h2 id="repTitle"></h2>
+
+      <p class="muted">
+        Optional. Reputation stays separate from Quote Clarity.
+      </p>
+
+      <button
+        class="secondary"
+        onclick="searchReviews()"
+      >
+        Search contractor reviews
+      </button>
+
+      <div class="grid">
+
+        <label>
+          Google rating
+          <input
+            id="repRating"
+            type="number"
+            min="0"
+            max="5"
+            step=".1"
+            placeholder="4.7"
+          >
+        </label>
+
+        <label>
+          Review count
+          <input
+            id="repCount"
+            type="number"
+            min="0"
+            placeholder="286"
+          >
+        </label>
+
+      </div>
+
+      <label>
+        Are recent reviews generally positive?
+
+        <select id="repRecent">
+          <option>Not Sure</option>
+          <option>Yes</option>
+          <option>Mixed</option>
+          <option>No</option>
+        </select>
+
+      </label>
+
+      <label>
+        Do negative reviews show the same complaint repeatedly?
+
+        <select id="repRecurring">
+          <option>Not Sure</option>
+          <option>No</option>
+          <option>A Few</option>
+          <option>Yes</option>
+        </select>
+
+      </label>
+
+      <label>
+        Do reviews or references show experience with projects similar to yours?
+
+        <select id="repSimilar">
+          <option>Not Sure</option>
+          <option>Yes</option>
+          <option>Some</option>
+          <option>No</option>
+        </select>
+
+      </label>
+
+      <div class="actions">
+
+        <button onclick="saveReputation()">
+          Save & continue
+        </button>
+
+        <button
+          class="secondary"
+          onclick="skipReputation()"
+        >
+          Skip
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <section id="results" class="screen">
+
+    <div class="reportBrand">
+
+      <img
+        src="choicegrade-logo.png"
+        alt="ChoiceGrade"
+      >
+
+    </div>
+
+    <div class="topline">
+
+      <button
+        class="ghost"
+        onclick="go('questions')"
+      >
+        ← Review answers
+      </button>
+
+      <button
+        class="ghost"
+        onclick="newProject()"
+      >
+        New comparison
+      </button>
+
+    </div>
+
+    <div class="eyebrow">
+      CHOICEGRADE ANALYSIS
+    </div>
+
+    <h1>
+      Your comparison is ready.
+    </h1>
+
+    <p
+      id="resultSummary"
+      class="lead"
+    ></p>
+
+    <div id="findings"></div>
+
+    <h2>
+      Contractor snapshot
+    </h2>
+
+    <div id="contractorCards"></div>
+
+    <div class="card">
+
+      <h2>
+        Side-by-side comparison
+      </h2>
+
+      <div
+        id="compareTable"
+        class="tableWrap"
+      ></div>
+
+    </div>
+
+    <div class="card">
+
+      <h2>
+        Questions before you choose
+      </h2>
+
+      <div id="clarifications"></div>
+
+    </div>
+
+    <div class="card">
+
+      <h2>
+        What ChoiceGrade helped you uncover
+      </h2>
+
+      <div
+        id="uncovered"
+        class="metrics"
+      ></div>
+
+    </div>
+
+    <div class="card">
+
+      <h2>
+        Before you sign
+      </h2>
+
+      <div id="beforeSign"></div>
+
+    </div>
+
+    <div class="actions">
+
+      <button onclick="window.print()">
+        Print / Save PDF
+      </button>
+
+      <button
+        class="secondary"
+        onclick="exportProject()"
+      >
+        Download backup
+      </button>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<footer>
+  ChoiceGrade is a decision-support tool.
+  It does not guarantee contractor quality or final project cost.
+</footer>
+
+
+<script src="app.js?v=6.2a"></script>
+
+
+<div
+  id="paywallOverlay"
+  class="paywallOverlay hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="paywallTitle"
+>
+
+  <div class="paywallCard">
+
+    <button
+      class="paywallClose"
+      onclick="ChoiceGradeAccess.closePaywall()"
+      aria-label="Close"
+    >
+      ×
+    </button>
+
+    <div class="eyebrow">
+      YOUR COMPARISON IS READY
+    </div>
+
+    <h2 id="paywallTitle">
+      Unlock your complete ChoiceGrade analysis.
+    </h2>
+
+    <p id="paywallSummary">
+      Your information is saved on this device.
+      Unlock to see the full contractor comparison,
+      all clarification questions, response tracking
+      and printable report.
+    </p>
+
+    <div class="paywallFeatures">
+
+      <span>
+        ✓ Full Quote Clarity scores
+      </span>
+
+      <span>
+        ✓ Missing-detail & hidden-cost flags
+      </span>
+
+      <span>
+        ✓ Contractor clarification emails
+      </span>
+
+      <span>
+        ✓ Before-and-after clarification tracking
+      </span>
+
+      <span>
+        ✓ Printable final report
+      </span>
+
+    </div>
+
+    <div class="paywallPlans">
+
+      <button
+        class="planChoice"
+        onclick="ChoiceGradeAccess.beginCheckout('project_30')"
+      >
+
+        <span>
+
+          <b>
+            30-Day Project Pass
+          </b>
+
+          <small>
+            Full access for your current project
+          </small>
+
+        </span>
+
+        <strong>
+          $14.99
+        </strong>
+
+      </button>
+
+
+      <button
+        class="planChoice featuredPlan"
+        onclick="ChoiceGradeAccess.beginCheckout('lifetime')"
+      >
+
+        <span>
+
+          <em>
+            BEST VALUE
+          </em>
+
+          <b>
+            Lifetime Homeowner Access
+          </b>
+
+          <small>
+            Use ChoiceGrade for future projects too
+          </small>
+
+        </span>
+
+        <strong>
+          $39.99
+        </strong>
+
+      </button>
+
+    </div>
+
+    <p class="paywallFine">
+      Start free. No credit card required until you choose to unlock.
+    </p>
+
+  </div>
+
 </div>
 
-</body></html>
+</body>
+            </html>
