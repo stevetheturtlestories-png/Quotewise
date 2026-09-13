@@ -1,4 +1,5 @@
-const CACHE='choicegrade-v6-phase2c';
+
+const CACHE='choicegrade-v6-phase2d';
 
 const ASSETS=[
   './',
@@ -8,34 +9,34 @@ const ASSETS=[
   'account.html',
   'marketing.css?v=6.0',
   'auth.css?v=6.2a',
-  'styles.css?v=6.2b',
+  'styles.css?v=6.3',
   'app.js?v=6.2a',
   'access.js?v=6.2a',
   'auth.js?v=6.2a',
   'account.js?v=6.2a',
   'config.js',
-  'manifest.json',
+  'manifest.json?v=6.3',
   'choicegrade-logo.png',
   'choicegrade-mark.png',
   'choicegrade-app-icon.png'
 ];
 
-self.addEventListener('install',e=>{
+self.addEventListener('install',event=>{
   self.skipWaiting();
 
-  e.waitUntil(
-    caches.open(CACHE).then(c=>c.addAll(ASSETS))
+  event.waitUntil(
+    caches.open(CACHE).then(cache=>cache.addAll(ASSETS))
   );
 });
 
-self.addEventListener('activate',e=>{
-  e.waitUntil(
+self.addEventListener('activate',event=>{
+  event.waitUntil(
     Promise.all([
       caches.keys().then(keys=>
         Promise.all(
           keys
-            .filter(k=>k!==CACHE)
-            .map(k=>caches.delete(k))
+            .filter(key=>key!==CACHE)
+            .map(key=>caches.delete(key))
         )
       ),
       self.clients.claim()
@@ -43,21 +44,26 @@ self.addEventListener('activate',e=>{
   );
 });
 
-self.addEventListener('fetch',e=>{
-  if(e.request.mode==='navigate'){
-    e.respondWith(
-      fetch(e.request).catch(()=>caches.match('./app.html'))
+self.addEventListener('fetch',event=>{
+  if(event.request.mode==='navigate'){
+    event.respondWith(
+      fetch(event.request, {cache:'no-store'})
+        .catch(()=>caches.match('app.html'))
     );
     return;
   }
 
-  e.respondWith(
-    fetch(e.request)
-      .then(r=>{
-        const copy=r.clone();
-        caches.open(CACHE).then(c=>c.put(e.request,copy));
-        return r;
+  event.respondWith(
+    fetch(event.request, {cache:'no-store'})
+      .then(response=>{
+        const copy=response.clone();
+
+        caches.open(CACHE).then(cache=>{
+          cache.put(event.request,copy);
+        });
+
+        return response;
       })
-      .catch(()=>caches.match(e.request))
+      .catch(()=>caches.match(event.request))
   );
 });
